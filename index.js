@@ -73,10 +73,35 @@ async function run() {
             res.send(result)
         })
 
+        app.put('/events/:id', async (req, res) => {
+            const updatedEvent = req.body;
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: 
+                    updatedEvent
+                
+            };
+            const options = { upsert: true };
+            const result = await eventsCollection.updateOne(filter, updatedDoc, options);
+
+            res.send(result);
+
+        })
+
+        app.delete('/events/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await eventsCollection.deleteOne(query);
+            res.send(result);
+        })
+
+
+        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 
-        //  book 
+        //  BOOKINGs
 
         app.get('/bookings', async (req, res) => {
             const email = req.query.email;
