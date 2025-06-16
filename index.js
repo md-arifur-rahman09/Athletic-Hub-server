@@ -7,11 +7,11 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 
 
-const port = process.env.port || 3000;
+const port = process.env.PORT || 3000;
 
 // middleware
 app.use(cors({
-    origin: ['http://localhost:5173'],
+    origin: ['http://localhost:5173', 'https://athletic-hub-7dbfe.web.app'],
     credentials: true
 }));
 app.use(express.json());
@@ -65,7 +65,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
 
         // DB collection
         const eventsCollection = client.db('athleticHubDB').collection('events');
@@ -79,7 +79,8 @@ async function run() {
             const token = jwt.sign(email, process.env.JWT_SECRET, { expiresIn: '1h' });
             res.cookie('token', token, {
                 httpOnly: true,
-                secure: false
+                secure: true,
+                sameSite: 'none'
             })
             res.send({ success: true });
 
@@ -171,6 +172,7 @@ async function run() {
         //book event 
         app.post('/bookings', async (req, res) => {
             const eventBookingData = req.body;
+
             const result = await bookingsCollection.insertOne(eventBookingData)
             res.send(result)
 
@@ -185,15 +187,17 @@ async function run() {
         })
 
 
-
-        app.get('/events/:id',verifyToken, async (req, res) => {
+        // event bookings
+        app.get('/events/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const query = { eventId: id }
             const result = await bookingsCollection.find(query).toArray();
             res.send(result);
         })
+
+
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
+        // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
