@@ -155,16 +155,26 @@ async function run() {
             const bookings = await bookingsCollection.find(query).toArray();
 
 
+       
+
             for (let booking of bookings) {
                 const eventId = booking.eventId;
                 const eventQuery = { _id: new ObjectId(eventId) };
                 const event = await eventsCollection.findOne(eventQuery);
 
-                booking.type = event.type;
-                booking.eventName = event.eventName;
-                booking.image = event.image;
-
+                if (event) {
+                    booking.type = event.type;
+                    booking.eventName = event.eventName;
+                    booking.image = event.image;
+                } else {
+                   
+                    booking.type = "Unknown";
+                    booking.eventName = "Event not found";
+                    booking.image = "";
+                }
             }
+
+
             res.send(bookings);
         })
 
